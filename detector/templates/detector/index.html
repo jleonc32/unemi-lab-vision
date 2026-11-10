@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoreo - UNEMI Lab</title>
+    <style>
+        :root {
+            --primary-blue: #2563eb;
+            --bg-color: #f8fafc;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-dark); }
+        
+        /* Navbar superior */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: white; border-bottom: 1px solid var(--border-color); }
+        .logo-section { display: flex; align-items: center; gap: 15px; }
+        .logo-icon { background: var(--primary-blue); color: white; padding: 10px; border-radius: 8px; font-weight: bold; }
+        .nav-tabs { display: flex; gap: 30px; }
+        .tab { font-weight: 600; color: var(--text-muted); text-decoration: none; padding-bottom: 5px; }
+        .tab.active { color: var(--primary-blue); border-bottom: 2px solid var(--primary-blue); }
+        .user-profile { display: flex; align-items: center; gap: 10px; font-size: 0.9em; text-align: right; }
+        .avatar { background: #e0e7ff; color: var(--primary-blue); padding: 8px 12px; border-radius: 50%; font-weight: bold; }
+
+        /* Contenido principal */
+        .main-container { padding: 30px; max-width: 1400px; margin: 0 auto; }
+        .page-title { margin-bottom: 20px; }
+        .page-title h1 { margin: 0; font-size: 1.5em; }
+        .page-title p { margin: 5px 0 0 0; color: var(--text-muted); font-size: 0.9em; }
+
+        .dashboard-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+        
+        /* Panel Izquierdo: Cámara */
+        .video-section { flex: 3; min-width: 600px; background: #0f172a; border-radius: 12px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .video-header { display: flex; justify-content: space-between; padding: 15px 20px; color: white; background: #1e293b; font-size: 0.85em; }
+        .live-badge { background: #ef4444; color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+        .video-feed { width: 100%; object-fit: cover; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+
+        /* Panel Derecho: Registro */
+        .sidebar { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: white; border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); }
+        .btn-green { background: #10b981; color: white; width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        
+        .recent-logs h3 { font-size: 1em; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        .log-item { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.9em; }
+        .log-info strong { display: block; color: var(--text-dark); }
+        .log-info span { color: var(--text-muted); font-size: 0.85em; }
+        .dot { margin-right: 5px; }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Navegación -->
+    <header class="navbar">
+        <div class="logo-section">
+            <div class="logo-icon">⚗️</div>
+            <div>
+                <strong style="display: block;">LABORATORIO P</strong>
+                <span style="font-size: 0.75em; color: var(--text-muted);">UNIVERSIDAD ESTATAL DE MILAGRO</span>
+            </div>
+        </div>
+        <nav class="nav-tabs">
+            <a href="{% url 'index' %}" class="tab active">Monitoreo</a>
+            <a href="{% url 'inventario' %}" class="tab">Inventario</a>
+        </nav>
+        <div class="user-profile">
+            <div>
+                <strong>{{ request.user.username|default:"Admin UNEMI"|title }}</strong><br>
+                <span style="color: var(--text-muted);">Administrador</span>
+            </div>
+            <div class="avatar">👤</div>
+            <!-- Botón de Cerrar Sesión seguro -->
+            <form action="{% url 'logout' %}" method="post" style="display: inline; margin-left: 15px;">
+                {% csrf_token %}
+                <button type="submit" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85em;">Cerrar sesión</button>
+            </form>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="main-container">
+        <div class="page-title">
+            <h1>Monitoreo de acceso</h1>
+            <p>Detección y conteo inteligente en tiempo real</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Feed de la cámara web -->
+            <section class="video-section">
+                <div class="video-header">
+                    <span>📷 Cámara 01 - Acceso principal</span>
+                    <span>1080p | 24 FPS | <span class="live-badge">EN VIVO</span></span>
+                </div>
+                <!-- El stream de OpenCV -->
+                <img src="{% url 'video_feed' %}" class="video-feed" alt="Feed de la Cámara Web">
+            </section>
+
+            <!-- Panel lateral de registros -->
+            <aside class="sidebar">
+                <div class="card">
+                    <p style="color: var(--text-muted); font-weight: 600; font-size: 0.8em; margin-top:0;">CONTROL DE AFORO</p>
+                    <h2 style="margin: 5px 0 15px 0;">Ocupación del Laboratorio</h2>
+                    <button class="btn-green">✓ Guardar conteo actual</button>
+                </div>
+
+                <div class="card recent-logs">
+                    <h3>Historial del sistema</h3>
+                    
+                    <div class="log-item">
+                        <div class="log-info"><span class="dot" style="color: #10b981;">●</span> <strong>Registro de aforo guardado</strong> <span>Laboratorio P</span></div>
+                        <div style="text-align: right;"><span style="color: var(--text-dark);">Hace 5 min</span></div>
+                    </div>
+                    <div class="log-item">
+                        <div class="log-info"><span class="dot" style="color: #3b82f6;">●</span> <strong>Cámara encendida</strong> <span>Módulo OpenCV activo</span></div>
+                        <div style="text-align: right;"><span style="color: var(--text-dark);">Hace 1 hora</span></div>
+                    </div>
+                    <div class="log-item">
+                        <div class="log-info"><span class="dot" style="color: #64748b;">●</span> <strong>Inicio de sesión</strong> <span>Acceso al sistema</span></div>
+                        <div style="text-align: right;"><span style="color: var(--text-dark);">Hoy</span></div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+</body>
+</html>0
